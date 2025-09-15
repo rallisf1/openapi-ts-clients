@@ -17,9 +17,13 @@ for api in $(echo "$apis" | jq -c '.[]'); do
   echo "Checking $name at $url"
 
   # Fetch schema content
-  schema_content=$(curl -s "$url")
+  if ! schema_content=$(curl -s --fail --max-time 30 "$url"); then
+    echo "Failed to fetch schema for $name from $url"
+    continue
+  fi
+
   if [ -z "$schema_content" ]; then
-    echo "Failed to fetch schema for $name"
+    echo "Empty schema content for $name"
     continue
   fi
 
@@ -53,7 +57,17 @@ for api in $(echo "$apis" | jq -c '.[]'); do
     schema_file="openapi.json"
   else
     echo "$schema_content" > openapi.yaml
-    schema_file="openapi.yaml"
+  if ! npx openapi-typescript@latest "$schema_file" -o client.ts; then
+    echo "Failed to generate TypeScript client for $name"
+    cd ../..
+    continue
+  fi
+
+  if [ ! -f client.ts ]; then
+    echo "Generated client file not found for $name"
+    cd ../..
+    continue
+  fi
   fi
 
   # Generate client
@@ -63,10 +77,9 @@ for api in $(echo "$apis" | jq -c '.[]'); do
   cat > package.json << EOF
 {
   "name": "@rallisf1/ts-client-$name",
-  "version": "$version",
-  "description": "TypeScript client for $name",
   "main": "client.ts",
   "types": "client.ts",
+  "version": "$version",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -78,7 +91,19 @@ for api in $(echo "$apis" | jq -c '.[]'); do
 EOF
 
   # Publish to GitHub Packages
-  npm publish
+  if ! npm publish --dry-run; then
+    echo "npm publish dry-run failed for $name@$version"
+    cd ../..
+    continue
+  fi
+
+  if ! npm publish; then
+    echo "Failed to publish package for $name@$version"
+    cd ../..
+    continue
+  fi
+
+  echo "Successfully published @rallisf1/ts-client-$name@$version"
 
   # Return to root directory
   cd ../..
