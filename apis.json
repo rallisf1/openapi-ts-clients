@@ -1,0 +1,30 @@
+[
+  {
+    "name": "enhance",
+    "url": "https://apidocs.enhance.com/spec/oas3-api.yaml"
+  },
+  {
+    "name": "grist",
+    "url": "https://raw.githubusercontent.com/gristlabs/grist-help/master/api/grist.yml"
+  },
+  {
+    "name": "nginx-proxy-manager",
+    "url": "https://raw.githubusercontent.com/NginxProxyManager/nginx-proxy-manager/refs/heads/develop/backend/schema/swagger.json"
+  },
+  {
+    "name": "listmonk",
+    "url": "https://listmonk.app/docs/swagger/collections.yaml"
+  },
+  {
+    "name": "mailcow",
+    "url": "https://raw.githubusercontent.com/mailcow/mailcow-dockerized/refs/heads/master/data/web/api/openapi.yaml"
+  },
+  {
+    "name": "authentik",
+    "url": "https://auth.dws.gr/api/v3/schema/"
+  },
+  {
+    "name": "kutt",
+    "url": "https://docs.kutt.it/api.json"
+  }
+]
