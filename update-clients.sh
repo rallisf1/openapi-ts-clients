@@ -28,9 +28,9 @@ for api in $(echo "$apis" | jq -c '.[]'); do
   fi
 
   # Extract version: try JSON first, then YAML
-  version=$(echo "$schema_content" | jq -r '.info.version' 2>/dev/null)
+  version=$(echo "$schema_content" | jq -r '.info.version' 2>/dev/null | sed 's/"//g')
   if [ -z "$version" ] || [ "$version" = "null" ]; then
-    version=$(echo "$schema_content" | yq e '.info.version' - 2>/dev/null)
+    version=$(echo "$schema_content" | yq '.info.version' - 2>/dev/null | sed 's/"//g')
   fi
 
   if [ -z "$version" ] || [ "$version" = "null" ]; then
@@ -39,7 +39,7 @@ for api in $(echo "$apis" | jq -c '.[]'); do
   fi
 
   # Get last published version from versions.json
-  last_version=$(echo "$versions" | jq -r ".[\"$url\"]")
+  last_version=$(echo "$versions" | jq -r ".[\"$name\"]")
   if [ "$last_version" = "$version" ]; then
     echo "Version $version for $name is unchanged. Skipping."
     continue
@@ -57,21 +57,17 @@ for api in $(echo "$apis" | jq -c '.[]'); do
     schema_file="openapi.json"
   else
     echo "$schema_content" > openapi.yaml
-  if ! npx openapi-typescript@latest "$schema_file" -o client.ts; then
-    echo "Failed to generate TypeScript client for $name"
-    cd ../..
-    continue
+    schema_file="openapi.yaml"
   fi
+
+  # Generate client
+  CI=true npm_config_progress=false npx openapi-typescript@latest "$schema_file" -o client.ts
 
   if [ ! -f client.ts ]; then
     echo "Generated client file not found for $name"
     cd ../..
     continue
   fi
-  fi
-
-  # Generate client
-  npx openapi-typescript@latest "$schema_file" -o client.ts
 
   # Create package.json
   cat > package.json << EOF
@@ -109,7 +105,7 @@ EOF
   cd ../..
 
   # Update versions.json
-  versions=$(echo "$versions" | jq ".[\"$url\"] = \"$version\"")
+  versions=$(echo "$versions" | jq ".[\"$name\"] = \"$version\"")
 done
 
 # Save updated versions

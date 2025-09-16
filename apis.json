@@ -4,12 +4,8 @@
     "url": "https://apidocs.enhance.com/spec/oas3-api.yaml"
   },
   {
-    "name": "grist",
-    "url": "https://raw.githubusercontent.com/gristlabs/grist-help/master/api/grist.yml"
-  },
-  {
     "name": "nginx-proxy-manager",
-    "url": "https://raw.githubusercontent.com/NginxProxyManager/nginx-proxy-manager/refs/heads/develop/backend/schema/swagger.json"
+    "url": "http://s01.stolon.gr:81/api/schema"
   },
   {
     "name": "listmonk",
